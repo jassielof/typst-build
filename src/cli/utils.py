@@ -3,6 +3,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 import tomllib
 from urllib.parse import urlparse
 
@@ -105,13 +106,41 @@ def matches_version_req(req: str, ver: tuple[int, int, int]) -> bool:
     return True
 
 
-def linux_data_dir() -> Path:
-    base = os.environ.get("XDG_DATA_HOME", str(Path.home() / ".local" / "share"))
+def typst_data_dir() -> Path:
+    """Get the Typst data directory for the current platform.
+
+    Returns:
+        - Windows: %APPDATA%/typst
+        - macOS: ~/Library/Application Support/typst
+        - Linux: $XDG_DATA_HOME/typst or ~/.local/share/typst
+    """
+    if sys.platform == "win32":
+        base = os.environ.get("APPDATA")
+        if not base:
+            base = str(Path.home() / "AppData" / "Roaming")
+    elif sys.platform == "darwin":
+        base = str(Path.home() / "Library" / "Application Support")
+    else:  # Linux and other Unix-like systems
+        base = os.environ.get("XDG_DATA_HOME", str(Path.home() / ".local" / "share"))
     return Path(base) / "typst"
 
 
-def linux_cache_dir() -> Path:
-    base = os.environ.get("XDG_CACHE_HOME", str(Path.home() / ".cache"))
+def typst_cache_dir() -> Path:
+    """Get the Typst cache directory for the current platform.
+
+    Returns:
+        - Windows: %LOCALAPPDATA%/typst
+        - macOS: ~/Library/Caches/typst
+        - Linux: $XDG_CACHE_HOME/typst or ~/.cache/typst
+    """
+    if sys.platform == "win32":
+        base = os.environ.get("LOCALAPPDATA")
+        if not base:
+            base = str(Path.home() / "AppData" / "Local")
+    elif sys.platform == "darwin":
+        base = str(Path.home() / "Library" / "Caches")
+    else:  # Linux and other Unix-like systems
+        base = os.environ.get("XDG_CACHE_HOME", str(Path.home() / ".cache"))
     return Path(base) / "typst"
 
 

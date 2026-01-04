@@ -7,8 +7,8 @@ from .utils import (
     copy_files,
     generate_thumbnail,
     get_typst_version,
-    linux_cache_dir,
-    linux_data_dir,
+    typst_cache_dir,
+    typst_data_dir,
     matches_version_req,
     read_toml,
     validate_package_name,
@@ -200,7 +200,7 @@ def install(
                 f"Typst version check passed (required: {compiler_req}, current: {current[0]}.{current[1]}.{current[2]})."
             )
 
-        data_dir = linux_data_dir()
+        data_dir = typst_data_dir()
         provider_abbr = {
             "github.com": "gh",
             "gitlab.com": "gl",
@@ -261,10 +261,10 @@ def list_cmd(
     total = 0
     if want_local or list_all:
         typer.echo("\nLocal packages (data directory):")
-        total += list_packages_in_root(linux_data_dir() / "packages", "data")
+        total += list_packages_in_root(typst_data_dir() / "packages", "data")
     if want_preview or list_all:
         typer.echo("\nPreview packages (cache directory):")
-        total += list_packages_in_root(linux_cache_dir() / "packages", "cache")
+        total += list_packages_in_root(typst_cache_dir() / "packages", "cache")
 
     if total == 0:
         if want_local and not want_preview:

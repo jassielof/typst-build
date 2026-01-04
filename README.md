@@ -1,14 +1,13 @@
 # TypM: Typst Package Manager
 
-## Dependencies
-
-- Typst
-- Git
-
-## Usage
-
-
 
 ## Installation
 
-Use astral/uv to install the tool from git.
+Use astral/uv to install.
+
+### Dependencies
+
+Your need the following installed and discoverable in your system's shell:
+
+- Typst
+- Git
