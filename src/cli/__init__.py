@@ -294,3 +294,10 @@ def update(check: bool = typer.Option()):
     Only applies to local packages
     """
     pass
+
+@app.command()
+def info():
+    """
+    Show information from an installed or remote (git) Typst package/template.
+    """
+    
