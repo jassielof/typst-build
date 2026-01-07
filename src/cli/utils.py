@@ -1,13 +1,14 @@
 import os
-from pathlib import Path
 import re
 import shutil
 import subprocess
 import sys
 import tomllib
+from pathlib import Path
 from urllib.parse import urlparse
 
 import typer
+
 from .models import GitSourceDescriptor
 
 
