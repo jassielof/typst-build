@@ -19,6 +19,11 @@ def list_packages(
         "--local",
         help="List only packages from data directory (manually installed, any namespace)",
     ),
+    namespace: str = typer.Option(
+        None,
+        "--namespace",
+        help="Filter packages by namespace (e.g., 'preview', 'github', 'gh-user')",
+    ),
 ):
     from rich.console import Console
     from rich.table import Table
@@ -46,7 +51,9 @@ def list_packages(
         except Exception:
             return (ver,)
 
-    def list_packages_in_root(packages_root_dir: Path, root_type: str) -> int:
+    def list_packages_in_root(
+        packages_root_dir: Path, root_type: str, filter_namespace: str = None
+    ) -> int:
         count = 0
         if not packages_root_dir.is_dir():
             typer.echo(
@@ -61,6 +68,11 @@ def list_packages(
 
         for ns_dir in sorted([p for p in packages_root_dir.iterdir() if p.is_dir()]):
             ns = ns_dir.name
+
+            # Skip if filtering by namespace and this doesn't match
+            if filter_namespace and ns != filter_namespace:
+                continue
+
             for pkg_dir in sorted([p for p in ns_dir.iterdir() if p.is_dir()]):
                 pkg = pkg_dir.name
                 versions = []
@@ -77,7 +89,12 @@ def list_packages(
                     packages[(ns, pkg)] = versions
 
         if not packages:
-            typer.echo(f"  No {root_type} packages found.")
+            if filter_namespace:
+                typer.echo(
+                    f"  No {root_type} packages found with namespace '{filter_namespace}'."
+                )
+            else:
+                typer.echo(f"  No {root_type} packages found.")
             return 0
 
         # Check if all packages share the same namespace
@@ -120,7 +137,7 @@ def list_packages(
 
     if want_local or list_all:
         typer.echo("")
-        list_packages_in_root(typst_data_dir() / "packages", "data")
+        list_packages_in_root(typst_data_dir() / "packages", "data", namespace)
     if want_universe or list_all:
         typer.echo("")
-        list_packages_in_root(typst_cache_dir() / "packages", "cache")
+        list_packages_in_root(typst_cache_dir() / "packages", "cache", namespace)

@@ -23,8 +23,13 @@ def info(
         # Parse the typst.toml file and return the package information
         return read_toml(toml_path)
 
-    def print_package_info(package_info):
+    def print_package_info(package_info, monorepo_path=None):
         # Print the relevant package information (be tolerant of missing fields)
+        from rich.console import Console
+        from rich.panel import Panel
+        from rich.table import Table
+
+        console = Console()
         pkg = package_info.get("package", {})
         name = pkg.get("name", "<unknown>")
         version = pkg.get("version", "<unknown>")
@@ -34,15 +39,30 @@ def info(
         homepage = pkg.get("homepage")
         repository = pkg.get("repository")
 
-        typer.echo(f"Name: {name}")
-        typer.echo(f"Version: {version}")
-        typer.echo(f"Description: {description}")
-        typer.echo(f"Authors: {authors}")
-        typer.echo(f"License: {license_}")
+        # Create a table for package information
+        table = Table(show_header=False, box=None, padding=(0, 2), expand=True)
+        table.add_column("Field", style="cyan bold", width=15, no_wrap=True)
+        table.add_column("Value", style="white")
+
+        table.add_row("Package", f"[bold green]{name}[/bold green]")
+        table.add_row("Version", version)
+        if description != "<none>":
+            table.add_row("Description", description)
+        if authors != "<none>":
+            table.add_row("Authors", authors)
+        table.add_row("License", license_)
         if homepage:
-            typer.echo(f"Homepage: {homepage}")
+            table.add_row("Homepage", homepage)
         if repository:
-            typer.echo(f"Repository: {repository}")
+            table.add_row("Repository", repository)
+
+        # If monorepo path is provided, show it in the panel title
+        if monorepo_path:
+            title = f"[bold cyan]Monorepo Path:[/bold cyan] {monorepo_path}"
+            panel = Panel(table, title=title, title_align="left", expand=False)
+            console.print(panel)
+        else:
+            console.print(table)
 
     # Check if the package is installed locally
     local_package_path = typst_data_dir() / "packages" / package_name
@@ -91,7 +111,7 @@ def info(
 
         multiple = len(toml_candidates) > 1
         if multiple:
-            typer.echo("Multiple packages found in this monorepo:")
+            typer.echo("\n[bold]Multiple packages found in this monorepo:[/bold]\n")
 
         for path in toml_candidates:
             try:
@@ -99,10 +119,11 @@ def info(
             except ValueError:
                 rel_path = path.parent
 
-            if multiple:
-                typer.echo(f"- {rel_path}")
-
             package_info = parse_typst_toml(path)
-            print_package_info(package_info)
+            if multiple:
+                print_package_info(package_info, monorepo_path=str(rel_path))
+            else:
+                print_package_info(package_info)
+
             if multiple:
                 typer.echo("")
