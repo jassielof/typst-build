@@ -77,17 +77,28 @@ def list_packages(
                     packages[(ns, pkg)] = versions
 
         if not packages:
+            typer.echo(f"  No {root_type} packages found.")
             return 0
 
-        # Create Rich table
-        table = Table(title=f"{root_type.title()} Packages", show_header=True)
+        # Check if all packages share the same namespace
+        namespaces = set(ns for ns, _ in packages.keys())
+        single_namespace = len(namespaces) == 1
+        common_ns = next(iter(namespaces)) if single_namespace else None
+
+        # Create Rich table with namespace info in title if applicable
+        title = f"{root_type.title()} Packages"
+        if single_namespace and common_ns:
+            title = f"{root_type.title()} Packages (@{common_ns})"
+
+        table = Table(title=title, show_header=True)
         table.add_column("Package", style="cyan", no_wrap=False)
         table.add_column("Version(s)", style="green", no_wrap=False)
         table.add_column("Description", style="white", no_wrap=False)
 
         # Add rows for each package
         for (ns, pkg), versions in sorted(packages.items()):
-            pkg_name = f"@{ns}/{pkg}"
+            # Omit namespace if all packages share the same one
+            pkg_name = pkg if single_namespace else f"@{ns}/{pkg}"
 
             if len(versions) == 1:
                 # Single version
@@ -107,18 +118,9 @@ def list_packages(
     want_universe = universe
     list_all = not want_local and not want_universe
 
-    total = 0
     if want_local or list_all:
         typer.echo("")
-        total += list_packages_in_root(typst_data_dir() / "packages", "data")
+        list_packages_in_root(typst_data_dir() / "packages", "data")
     if want_universe or list_all:
         typer.echo("")
-        total += list_packages_in_root(typst_cache_dir() / "packages", "cache")
-
-    if total == 0:
-        if want_local and not want_universe:
-            typer.echo("No local packages found.")
-        elif want_universe and not want_local:
-            typer.echo("No Universe packages found.")
-        else:
-            typer.echo("No packages found in standard Typst data or cache directories.")
+        list_packages_in_root(typst_cache_dir() / "packages", "cache")
