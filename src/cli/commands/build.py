@@ -66,7 +66,7 @@ def build(
         toml_dir,
         final_output_dir,
         package_exclude,
-        f"{namespace}/{package_name}",
+        package_import_base=f"{namespace}/{package_name}",
         package_version,
         package_entrypoint,
     )
