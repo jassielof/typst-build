@@ -273,85 +273,128 @@ def copy_files(
                 shutil.copy2(src_path, dst_path)
 
 
-def parse_git_source(git_source_url: str) -> GitSourceDescriptor:
-    # Alias form: gh|gl|bb/user/repo[/path/in/repo]
+def _try_parse_alias_form(git_source_url: str) -> GitSourceDescriptor | None:
+    """Parse alias form: gh|gl|bb/user/repo[/path/in/repo]."""
     parts = git_source_url.split("/")
-    if len(parts) >= 3:
-        alias = parts[0].lower()
-        user = parts[1]
-        repo_and_path = "/".join(parts[2:])
-        host = {
-            "gh": "github.com",
-            "github": "github.com",
-            "gl": "gitlab.com",
-            "gitlab": "gitlab.com",
-            "bb": "bitbucket.org",
-            "bitbucket": "bitbucket.org",
-        }.get(alias, "")
-        if host and user and repo_and_path:
-            repo_name, repo_path = (repo_and_path.split("/", 1) + [""])[:2]
-            if repo_name:
-                return GitSourceDescriptor(
-                    repo_url_for_clone=f"https://{host}/{user}/{repo_name}.git",
-                    git_ref=None,
-                    path_in_repo=Path(repo_path),
-                    provider_host=host,
-                    user_or_org=user,
-                )
+    if len(parts) < 3:
+        return None
+
+    alias = parts[0].lower()
+    user = parts[1]
+    repo_and_path = "/".join(parts[2:])
+    host = {
+        "gh": "github.com",
+        "github": "github.com",
+        "gl": "gitlab.com",
+        "gitlab": "gitlab.com",
+        "bb": "bitbucket.org",
+        "bitbucket": "bitbucket.org",
+    }.get(alias, "")
+
+    if not (host and user and repo_and_path):
+        return None
+
+    repo_name, repo_path = (repo_and_path.split("/", 1) + [""])[:2]
+    if not repo_name:
+        return None
+
+    return GitSourceDescriptor(
+        repo_url_for_clone=f"https://{host}/{user}/{repo_name}.git",
+        git_ref=None,
+        path_in_repo=Path(repo_path),
+        provider_host=host,
+        user_or_org=user,
+    )
+
+
+def _parse_github_url(host: str, segs: list[str]) -> GitSourceDescriptor:
+    """Parse GitHub URL format."""
+    user = segs[0]
+    repo = segs[1].removesuffix(".git")
+    git_ref = None
+    path_parts: list[str] = []
+
+    if len(segs) > 3 and segs[2] in ("tree", "blob"):
+        git_ref = segs[3]
+        path_parts = segs[4:]
+    elif len(segs) > 2:
+        path_parts = segs[2:]
+
+    return GitSourceDescriptor(
+        repo_url_for_clone=f"https://{host}/{user}/{repo}.git",
+        git_ref=git_ref,
+        path_in_repo=Path("/".join(path_parts)),
+        provider_host=host,
+        user_or_org=user,
+    )
+
+
+def _parse_gitlab_url(host: str, segs: list[str]) -> GitSourceDescriptor:
+    """Parse GitLab URL format."""
+    user = segs[0]
+    repo = segs[1].removesuffix(".git")
+    git_ref = None
+    path_parts: list[str] = []
+
+    if len(segs) > 4 and segs[2] == "-" and segs[3] in ("tree", "blob"):
+        git_ref = segs[4]
+        path_parts = segs[5:]
+    elif len(segs) > 2:
+        path_parts = segs[2:]
+
+    return GitSourceDescriptor(
+        repo_url_for_clone=f"https://{host}/{user}/{repo}.git",
+        git_ref=git_ref,
+        path_in_repo=Path("/".join(path_parts)),
+        provider_host=host,
+        user_or_org=user,
+    )
+
+
+def _parse_bitbucket_url(host: str, segs: list[str]) -> GitSourceDescriptor:
+    """Parse Bitbucket URL format."""
+    user = segs[0]
+    repo = segs[1].removesuffix(".git")
+    path_parts = segs[2:] if len(segs) > 2 else []
+
+    return GitSourceDescriptor(
+        repo_url_for_clone=f"https://{host}/{user}/{repo}.git",
+        git_ref=None,
+        path_in_repo=Path("/".join(path_parts)),
+        provider_host=host,
+        user_or_org=user,
+    )
+
+
+def parse_git_source(git_source_url: str) -> GitSourceDescriptor:
+    """Parse Git source URL or alias into a GitSourceDescriptor."""
+    # Try alias form first
+    result = _try_parse_alias_form(git_source_url)
+    if result:
+        return result
+
     # URL form
     u = urlparse(git_source_url)
     if not u.scheme or not u.netloc:
         raise typer.BadParameter(f"Invalid Git source URL or alias: {git_source_url}")
+
     host = u.netloc.lower()
     if host.startswith("www."):
         host = host[4:]
+
     segs = [s for s in u.path.split("/") if s]
-    if host == "github.com" and len(segs) >= 2:
-        user = segs[0]
-        repo = segs[1].removesuffix(".git")
-        git_ref = None
-        path_parts: list[str] = []
-        if len(segs) > 3 and segs[2] in ("tree", "blob"):
-            git_ref = segs[3]
-            path_parts = segs[4:]
-        elif len(segs) > 2:
-            path_parts = segs[2:]
-        return GitSourceDescriptor(
-            repo_url_for_clone=f"https://{host}/{user}/{repo}.git",
-            git_ref=git_ref,
-            path_in_repo=Path("/".join(path_parts)),
-            provider_host=host,
-            user_or_org=user,
+    if len(segs) < 2:
+        raise typer.BadParameter(
+            f"Unsupported Git URL format or provider (or invalid alias): {git_source_url}"
         )
-    if host == "gitlab.com" and len(segs) >= 2:
-        user = segs[0]
-        repo = segs[1].removesuffix(".git")
-        git_ref = None
-        path_parts: list[str] = []
-        if len(segs) > 4 and segs[2] == "-" and segs[3] in ("tree", "blob"):
-            git_ref = segs[4]
-            path_parts = segs[5:]
-        elif len(segs) > 2:
-            path_parts = segs[2:]
-        return GitSourceDescriptor(
-            repo_url_for_clone=f"https://{host}/{user}/{repo}.git",
-            git_ref=git_ref,
-            path_in_repo=Path("/".join(path_parts)),
-            provider_host=host,
-            user_or_org=user,
-        )
-    if host == "bitbucket.org" and len(segs) >= 2:
-        user = segs[0]
-        repo = segs[1].removesuffix(".git")
-        # Bitbucket doesn't use /-/tree like GitLab; treat similarly to GitHub default path
-        path_parts = segs[2:] if len(segs) > 2 else []
-        return GitSourceDescriptor(
-            repo_url_for_clone=f"https://{host}/{user}/{repo}.git",
-            git_ref=None,
-            path_in_repo=Path("/".join(path_parts)),
-            provider_host=host,
-            user_or_org=user,
-        )
+
+    if host == "github.com":
+        return _parse_github_url(host, segs)
+    elif host == "gitlab.com":
+        return _parse_gitlab_url(host, segs)
+    elif host == "bitbucket.org":
+        return _parse_bitbucket_url(host, segs)
+
     raise typer.BadParameter(
         f"Unsupported Git URL format or provider (or invalid alias): {git_source_url}"
     )
