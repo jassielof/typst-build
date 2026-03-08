@@ -1,0 +1,5 @@
+repository_source: []const u8,
+reference: []const u8,
+path: []const u8,
+provider: []const u8,
+owner: []const u8,
