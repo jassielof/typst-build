@@ -4,3 +4,9 @@
 [submodule "modules/toml"]
 	path = modules/toml
 	url = https://github.com/jassielof/toml-zig
+[submodule "modules/tempfile"]
+	path = modules/tempfile
+	url = https://github.com/jassielof/tempfile-zig
+[submodule "modules/vereda"]
+	path = modules/vereda
+	url = https://github.com/jassielof/vereda
