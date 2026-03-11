@@ -12,6 +12,22 @@ pub fn build(b: *std.Build) void {
         },
     );
 
+    const toml = b.dependency(
+        "toml",
+        .{
+            .target = target,
+            .optimize = optimize,
+        },
+    );
+
+    const tempfile = b.dependency(
+        "tempfile",
+        .{
+            .target = target,
+            .optimize = optimize,
+        },
+    );
+
     const cli_mod = b.createModule(.{
         .root_source_file = b.path("src/cli/main.zig"),
         .target = target,
@@ -20,6 +36,14 @@ pub fn build(b: *std.Build) void {
             .{
                 .name = "fangz",
                 .module = fangz.module("fangz"),
+            },
+            .{
+                .name = "toml",
+                .module = toml.module("toml"),
+            },
+            .{
+                .name = "tempfile",
+                .module = tempfile.module("tempfile"),
             },
         },
     });

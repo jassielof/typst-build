@@ -2,8 +2,8 @@ const fangz = @import("fangz");
 
 pub fn register(root: *fangz.Command) !void {
     const cmd = try root.addSubcommand(.{
-        .name = "install",
-        .description = "Install a package.",
+        .name = "uninstall",
+        .description = "Uninstall a package.",
     });
 
     cmd.setHooks(.{});

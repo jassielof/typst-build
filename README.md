@@ -1,6 +1,5 @@
 # TypM: Typst Package Manager
 
-
 ## Installation
 
 Use astral/uv to install.

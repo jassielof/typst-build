@@ -45,3 +45,6 @@ fn getTypstVersion() !semver {
     return semver.parse(version_str) catch error.InvalidSemver;
 }
 
+test {
+    std.testing.refAllDecls(@This());
+}

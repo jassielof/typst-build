@@ -10,6 +10,9 @@
         .toml = .{
             .path = "modules/toml",
         },
+        .tempfile = .{
+            .path = "modules/tempfile",
+        },
     },
     .paths = .{
         "build.zig",
