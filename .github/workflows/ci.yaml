@@ -18,12 +18,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          submodules: true
 
       - name: Setup Zig
         uses: mlugg/setup-zig@v2
 
       - name: Formatting
-        run: zig fmt src/ tests/ build.zig build.zig.zon examples/
+        run: zig fmt .
 
       - name: Build
         run: zig build --summary all -Doptimize=ReleaseSafe
@@ -31,13 +33,13 @@ jobs:
       - name: Tests
         run: zig build --summary all tests -Doptimize=ReleaseSafe
 
-      - name: Build docs
-        run: zig build --summary all docs
+      # - name: Build docs
+      #   run: zig build --summary all docs
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: zig-out/docs
+          # path: zig-out/docs
 
   # pages:
   #   environment:

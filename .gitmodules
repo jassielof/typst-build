@@ -6,7 +6,7 @@
 	url = https://github.com/jassielof/toml-zig
 [submodule "modules/tempfile"]
 	path = modules/tempfile
-	url = https://github.com/jassielof/tempfile-zig
+	url = https://github.com/jassielof/fugaz.git
 [submodule "modules/vereda"]
 	path = modules/vereda
 	url = https://github.com/jassielof/vereda
