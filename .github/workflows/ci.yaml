@@ -19,7 +19,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          submodules: true
+          submodules: recursive
 
       - name: Setup Zig
         uses: mlugg/setup-zig@v2
@@ -28,18 +28,18 @@ jobs:
         run: zig fmt .
 
       - name: Build
-        run: zig build --summary all -Doptimize=ReleaseSafe
+        run: zig build --summary all
 
       - name: Tests
-        run: zig build --summary all tests -Doptimize=ReleaseSafe
+        run: zig build --summary all tests
 
       # - name: Build docs
       #   run: zig build --summary all docs
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          # path: zig-out/docs
+      # - name: Upload artifact
+      #   uses: actions/upload-pages-artifact@v4
+      #   with:
+      #     path: zig-out/docs
 
   # pages:
   #   environment:
