@@ -20,8 +20,16 @@ pub fn build(b: *std.Build) void {
         },
     );
 
-    const tempfile = b.dependency(
-        "tempfile",
+    const fugaz = b.dependency(
+        "fugaz",
+        .{
+            .target = target,
+            .optimize = optimize,
+        },
+    );
+
+    const vereda = b.dependency(
+        "vereda",
         .{
             .target = target,
             .optimize = optimize,
@@ -42,8 +50,12 @@ pub fn build(b: *std.Build) void {
                 .module = toml.module("toml"),
             },
             .{
-                .name = "tempfile",
-                .module = tempfile.module("tempfile"),
+                .name = "fugaz",
+                .module = fugaz.module("fugaz"),
+            },
+            .{
+                .name = "vereda",
+                .module = vereda.module("vereda"),
             },
         },
     });

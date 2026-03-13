@@ -1,6 +1,6 @@
 const std = @import("std");
 const fangz = @import("fangz");
-const tempfile = @import("tempfile");
+const fugaz = @import("fugaz");
 
 const support = @import("../support.zig");
 
@@ -38,7 +38,7 @@ fn run(ctx: *fangz.ParseContext) !void {
     defer source.deinit(allocator);
 
     try std.fs.cwd().makePath(".typm-tmp");
-    var temp_dir = try tempfile.builder().prefix("typm-info-git-").tempDirIn(allocator, ".typm-tmp");
+    var temp_dir = try fugaz.builder().prefix("typm-info-git-").tempDirIn(allocator, ".typm-tmp");
     defer temp_dir.deinit();
 
     var stdout_buffer: [4096]u8 = undefined;

@@ -1,6 +1,6 @@
 const std = @import("std");
 const fangz = @import("fangz");
-const tempfile = @import("tempfile");
+const fugaz = @import("fugaz");
 
 const support = @import("../support.zig");
 
@@ -37,7 +37,7 @@ fn run(ctx: *fangz.ParseContext) !void {
     defer source.deinit(allocator);
 
     try std.fs.cwd().makePath(".typm-tmp");
-    var temp_dir = try tempfile.builder().prefix("typst-build-git-").tempDirIn(allocator, ".typm-tmp");
+    var temp_dir = try fugaz.builder().prefix("typst-build-git-").tempDirIn(allocator, ".typm-tmp");
     defer temp_dir.deinit();
 
     try stdout_writer.interface.print("Cloning {s} into {s}...\n", .{ source.repo_url_for_clone, temp_dir.path() });
