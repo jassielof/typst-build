@@ -10,8 +10,8 @@
         .toml = .{
             .path = "modules/toml",
         },
-        .tempfile = .{
-            .path = "modules/tempfile",
+        .fugaz = .{
+            .path = "modules/fugaz",
         },
     },
     .paths = .{
