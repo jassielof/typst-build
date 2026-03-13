@@ -13,6 +13,9 @@
         .fugaz = .{
             .path = "modules/fugaz",
         },
+        .vereda = .{
+            .path = "modules/vereda",
+        },
     },
     .paths = .{
         "build.zig",
