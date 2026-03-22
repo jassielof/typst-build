@@ -14,6 +14,7 @@ permissions:
 
 jobs:
   build:
+    name: Build and Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,16 +23,16 @@ jobs:
           submodules: recursive
 
       - name: Setup Zig
-        uses: mlugg/setup-zig@v2
+        uses: jassielof/setup-zig@v1
 
       - name: Formatting
-        run: zig fmt .
+        run: zig fmt --check build.zig build.zig.zon src
 
       - name: Build
         run: zig build --summary all
 
       - name: Tests
-        run: zig build --summary all tests
+        run: zig build tests --summary all
 
       # - name: Build docs
       #   run: zig build --summary all docs

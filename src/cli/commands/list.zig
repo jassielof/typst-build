@@ -119,6 +119,7 @@ fn listPackagesInRoot(allocator: std.mem.Allocator, packages_root_dir: []const u
             }
 
             if (versions.items.len == 0) continue;
+            sortVersionsDescending(versions.items);
             try printPackageSummary(namespace, package_name, versions.items);
         }
     }
@@ -169,4 +170,21 @@ fn bestDescription(versions: []const VersionInfo) []const u8 {
         if (version.description.len > 0) return version.description;
     }
     return "";
+}
+
+fn sortVersionsDescending(items: []VersionInfo) void {
+    const Sort = struct {
+        fn less(_: void, a: VersionInfo, b: VersionInfo) bool {
+            const pa = std.SemanticVersion.parse(a.version) catch {
+                const pb = std.SemanticVersion.parse(b.version) catch {
+                    return std.mem.order(u8, b.version, a.version) == .lt;
+                };
+                _ = pb;
+                return false;
+            };
+            const pb = std.SemanticVersion.parse(b.version) catch return true;
+            return std.SemanticVersion.order(pa, pb) == .gt;
+        }
+    };
+    std.mem.sort(VersionInfo, items, {}, Sort.less);
 }

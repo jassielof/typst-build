@@ -1,4 +1,4 @@
-__pycache__/
 .idea/
+.typm-tmp/
 .zig-cache/
 zig-out/

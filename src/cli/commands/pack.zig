@@ -9,7 +9,7 @@ pub fn register(root: *fangz.Command) !void {
         .description = "Build a Typst package/template from a typst.toml file to be published or installed.",
     });
 
-    try cmd.addAlias("pack");
+    try cmd.addAlias("build");
 
     try cmd.addPositional(.{
         .name = "manifest",
