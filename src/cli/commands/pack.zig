@@ -17,20 +17,18 @@ pub fn register(root: *fangz.Command) !void {
         .required = true,
     });
 
-    try cmd.addFlag(.{
+    try cmd.addFlag([]const u8, .{
         .name = "output-dir",
         .short = 'o',
         .description = "The output directory where the built package will be placed.",
-        .value_type = .string,
-        .default_value = .{ .string = "out" },
+        .default = "out",
     });
 
-    try cmd.addFlag(.{
+    try cmd.addFlag([]const u8, .{
         .name = "namespace",
         .short = 'n',
         .description = "Namespace for the package.",
-        .value_type = .string,
-        .default_value = .{ .string = "preview" },
+        .default = "preview",
     });
 
     cmd.setHooks(.{ .run = run });

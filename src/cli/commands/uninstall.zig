@@ -15,11 +15,10 @@ pub fn register(root: *fangz.Command) !void {
         .required = true,
     });
 
-    try cmd.addFlag(.{
+    try cmd.addFlag(?[]const u8, .{
         .name = "version",
         .short = 'v',
         .description = "Remove only this version; omit to remove all installed versions.",
-        .value_type = .string,
     });
 
     cmd.setHooks(.{ .run = run });

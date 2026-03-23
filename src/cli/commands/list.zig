@@ -14,20 +14,19 @@ pub fn register(root: *fangz.Command) !void {
         .description = "List installed Typst packages.",
     });
 
-    try cmd.addFlag(.{
+    try cmd.addFlag(bool, .{
         .name = "universe",
         .description = "List only Universe (cache) packages installed from Typst Universe.",
     });
 
-    try cmd.addFlag(.{
+    try cmd.addFlag(bool, .{
         .name = "local",
         .description = "List only packages from the data directory.",
     });
 
-    try cmd.addFlag(.{
+    try cmd.addFlag(?[]const u8, .{
         .name = "namespace",
         .description = "Filter packages by namespace.",
-        .value_type = .string,
     });
 
     cmd.setHooks(.{ .run = run });
